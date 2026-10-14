@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap" media="print" onload="this.media='all'">
 <style>
 /* Layout: instrument-panel page — header strip, one control bar, two blocks of small-multiple charts, data table */
 :root {
@@ -195,7 +195,9 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
   <footer id="foot"></footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly-basic.min.js"></script>
+<!-- Plotly лежит рядом со страницей; если файла нет, берём копию с jsDelivr -->
+<script src="plotly-basic.min.js"></script>
+<script>window.Plotly || document.write('<script src="https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js"><\/script>')</script>
 <script>
 const VARS = {
   abs: [
@@ -402,6 +404,10 @@ async function loadData() {
 }
 
 async function start() {
+  if (!window.Plotly) {
+    document.querySelector(".wrap").insertAdjacentHTML("afterbegin", '<p class="empty">Не загрузилась библиотека графиков (plotly-basic.min.js). Обновите страницу; если не помогло, проверьте, что файл лежит в папке site.</p>');
+    return;
+  }
   buildCards();
   try { DATA = await loadData(); }
   catch (e) { document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<p class="empty">Не удалось загрузить данные: ${e.message}</p>`); return; }
