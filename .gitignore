@@ -1,0 +1,5 @@
+site/data.json
+site/data.csv
+site/check_report.txt
+__pycache__/
+~$*.docx

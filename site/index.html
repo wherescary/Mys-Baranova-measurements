@@ -1,0 +1,432 @@
+<title>Мыс Баранова · МПЗ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap">
+<style>
+/* Layout: instrument-panel page — header strip, one control bar, two blocks of small-multiple charts, data table */
+:root {
+  --bg: #f4f7f9;
+  --surface: #ffffff;
+  --fg: #12202e;
+  --muted: #5b6977;
+  --line: #dbe2e9;
+  --grid: #e9eef3;
+  --accent: #1f6fc4;
+  --accent-soft: #e3eefa;
+  --mean: #33424f;
+  --warn: #a8550a;
+  --warn-soft: #fbefe2;
+  --f-display: "Unbounded", "Golos Text", system-ui, sans-serif;
+  --f-body: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141a; --surface: #151d25; --fg: #e5ecf2; --muted: #93a2b1; --line: #26323e; --grid: #1e2832;
+    --accent: #4b97ea; --accent-soft: #1a2c40; --mean: #c7d3de; --warn: #e6a346; --warn-soft: #33260f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141a; --surface: #151d25; --fg: #e5ecf2; --muted: #93a2b1; --line: #26323e; --grid: #1e2832;
+  --accent: #4b97ea; --accent-soft: #1a2c40; --mean: #c7d3de; --warn: #e6a346; --warn-soft: #33260f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+  display: grid; gap: 28px;
+}
+header { display: grid; gap: 10px; }
+.eyebrow {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+h1 {
+  font-family: var(--f-display); font-weight: 600; font-size: clamp(26px, 4.4vw, 40px);
+  line-height: 1.1; margin: 0; letter-spacing: -.01em; text-wrap: balance;
+}
+.lede { margin: 0; color: var(--muted); max-width: 68ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.facts b { color: var(--fg); font-weight: 500; }
+
+.controls {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 18px;
+}
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+input[type="datetime-local"] {
+  font-family: var(--f-mono); font-size: 14px; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; max-width: 100%;
+}
+.quick { display: flex; flex-wrap: wrap; gap: 6px; }
+button {
+  font: 500 13px var(--f-body); color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; padding-bottom: 7px; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+.count { margin-left: auto; font-family: var(--f-mono); font-size: 13px; color: var(--muted); padding-bottom: 8px; }
+
+section { display: grid; gap: 14px; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+h2 { font-family: var(--f-display); font-weight: 500; font-size: 18px; margin: 0; }
+.sec-head p { margin: 0; color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 14px; }
+.chart {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 12px 4px; min-width: 0;
+}
+.chart h3 { margin: 0 4px; font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+.chart h3 .sym { font-family: var(--f-mono); font-weight: 500; color: var(--accent); }
+.chart h3 .unit { margin-left: auto; font-family: var(--f-mono); font-weight: 400; font-size: 12px; color: var(--muted); }
+.plot { height: 250px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw-pt { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.sw-mean { width: 14px; height: 2px; background: var(--mean); position: relative; }
+.sw-mean::before { content: ""; position: absolute; left: 3px; top: -4px; width: 8px; height: 8px; border: 2px solid var(--mean); transform: rotate(45deg); background: var(--surface); box-sizing: border-box; }
+
+.table-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.table-tools .note { font-size: 13px; color: var(--muted); }
+.table-box { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--grid); }
+th { position: sticky; top: 0; background: var(--surface); font-family: var(--f-body); font-weight: 600; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line); }
+th.grp { text-align: center; color: var(--fg); }
+td:first-child, th:first-child { text-align: left; }
+td.sep, th.sep { border-left: 1px solid var(--line); }
+tr.flag td { background: var(--warn-soft); }
+tr.flag td:first-child::after { content: " ⚠"; color: var(--warn); }
+tbody tr:hover td { background: var(--accent-soft); }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+summary { cursor: pointer; font-weight: 600; }
+details ul { margin: 10px 0 2px; padding-left: 20px; font-size: 14px; color: var(--muted); }
+details li { margin: 4px 0; }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+@media (max-width: 640px) {
+  .controls { position: static; }
+  .count { margin-left: 0; width: 100%; }
+  .plot { height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">ААНИИ · магнитная станция · ледовая база</div>
+    <h1>Мыс Баранова</h1>
+    <p class="lede">Абсолютные измерения магнитного поля Земли и базисные значения вариометра по ежемесячным отчётам станции. Выберите период: графики и таблица обновятся.</p>
+    <div class="facts" id="facts"></div>
+  </header>
+
+  <div class="controls" role="group" aria-label="Период">
+    <div class="field">
+      <label for="from">Начало, UTC</label>
+      <input type="datetime-local" id="from" step="1">
+    </div>
+    <div class="field">
+      <label for="to">Конец, UTC</label>
+      <input type="datetime-local" id="to" step="1">
+    </div>
+    <div class="quick" id="quick">
+      <button type="button" data-range="all">Весь период</button>
+      <button type="button" data-range="12">12 мес.</button>
+      <button type="button" data-range="3">3 мес.</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="showMean" checked> Месячные средние ± СКО</label>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="legend" aria-hidden="true">
+    <span><i class="sw-pt"></i>Отдельное измерение</span>
+    <span><i class="sw-mean"></i>Среднее за месяц ± СКО, пересчитано по измерениям</span>
+    <span><i class="sw-pt" style="background:var(--warn)"></i>Измерение с замечанием (см. «Проверка данных»)</span>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Абсолютные значения МПЗ</h2>
+      <p>Табл. 2 отчёта</p>
+    </div>
+    <div class="grid" id="g-abs"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Базисные значения вариометра</h2>
+      <p>Табл. 1 отчёта</p>
+    </div>
+    <div class="grid" id="g-basis"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Данные за период</h2>
+      <p>Время UTC, D и I в градусах, остальное в нТл</p>
+    </div>
+    <div class="table-tools">
+      <button type="button" id="copyCsv">Скопировать CSV</button>
+      <a id="dlCsv" hidden><button type="button" tabindex="-1">Скачать CSV</button></a>
+      <span class="note" id="copyNote"></span>
+    </div>
+    <div class="table-box"><table id="tbl"></table></div>
+  </section>
+
+  <details id="issues">
+    <summary>Проверка данных</summary>
+    <ul id="issueList"></ul>
+  </details>
+
+  <footer id="foot"></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly-basic.min.js"></script>
+<script>
+const VARS = {
+  abs: [
+    { k: "aD", sym: "D", name: "Склонение", unit: "°", dec: 4 },
+    { k: "aH", sym: "H", name: "Горизонтальная составляющая", unit: "нТл", dec: 2 },
+    { k: "aZ", sym: "Z", name: "Вертикальная составляющая", unit: "нТл", dec: 2 },
+    { k: "aI", sym: "I", name: "Наклонение", unit: "°", dec: 4 },
+    { k: "aT", sym: "T", name: "Модуль полного вектора", unit: "нТл", dec: 2 },
+  ],
+  basis: [
+    { k: "bD", sym: "D₀", name: "Базисное значение D", unit: "°", dec: 4 },
+    { k: "bH", sym: "H₀", name: "Базисное значение H", unit: "нТл", dec: 2 },
+    { k: "bZ", sym: "Z₀", name: "Базисное значение Z", unit: "нТл", dec: 2 },
+    { k: "bT", sym: "T₀", name: "Базисное значение T", unit: "нТл", dec: 2 },
+  ],
+};
+const ALL = [...VARS.abs, ...VARS.basis];
+const $ = (id) => document.getElementById(id);
+let DATA = null, syncing = false;
+
+const toMs = (s) => Date.parse(s + "Z");
+const fmtDT = (s) => s.replace("T", " ");
+const fmtDate = (s) => { const [y, m, d] = s.slice(0, 10).split("-"); return `${d}.${m}.${y}`; };
+const MONTHS = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function buildCards() {
+  for (const [grp, list] of Object.entries(VARS)) {
+    $("g-" + grp).innerHTML = list.map(v => `
+      <div class="chart">
+        <h3><span class="sym">${v.sym}</span>${v.name}<span class="unit">${v.unit}</span></h3>
+        <div class="plot" id="p-${v.k}" role="img" aria-label="${v.name}, ${v.unit}"></div>
+      </div>`).join("");
+  }
+}
+
+function range() {
+  const f = $("from").value, t = $("to").value;
+  return [f ? toMs(f.length === 16 ? f + ":00" : f) : -Infinity, t ? toMs(t.length === 16 ? t + ":00" : t) : Infinity];
+}
+
+function filtered() {
+  const [a, b] = range();
+  return DATA.records.filter(r => { const x = toMs(r.t); return x >= a && x <= b; });
+}
+
+function monthStats(k) {
+  const [a, b] = range();
+  const xs = [], ys = [], es = [], txt = [];
+  for (const [ym, m] of Object.entries(DATA.months)) {
+    const [y, mo] = ym.split("-").map(Number);
+    const start = Date.UTC(y, mo - 1, 1), end = Date.UTC(y, mo, 1);
+    if (end <= a || start > b) continue;
+    const s = m.stats[k]; if (!s || s.mean == null) continue;
+    xs.push(new Date((start + end) / 2).toISOString().slice(0, 19));
+    ys.push(s.mean); es.push(s.std || 0);
+    txt.push(`${MONTHS[mo - 1]} ${y}<br>n = ${m.n}`);
+  }
+  return { xs, ys, es, txt };
+}
+
+function render() {
+  const rows = filtered();
+  const showMean = $("showMean").checked;
+  const ink = css("--fg"), muted = css("--muted"), grid = css("--grid"), line = css("--line"),
+        accent = css("--accent"), mean = css("--mean"), surface = css("--surface"), warn = css("--warn");
+  const [a, b] = range();
+  const xr = rows.length ? [rows[0].t, rows[rows.length - 1].t] : null;
+  // pad x-range slightly so edge points are not clipped
+  let xrange;
+  syncing = true;
+  if (xr) {
+    const lo = toMs(xr[0]), hi = toMs(xr[1]); const pad = Math.max((hi - lo) * 0.04, 86400000 * 2);
+    xrange = [new Date(lo - pad).toISOString().slice(0, 19), new Date(hi + pad).toISOString().slice(0, 19)];
+  }
+  for (const v of ALL) {
+    const el = $("p-" + v.k);
+    if (!rows.length) { Plotly.purge(el); el.innerHTML = '<div class="empty">Нет измерений в выбранном периоде</div>'; continue; }
+    if (el.querySelector(".empty")) el.innerHTML = "";
+    // break the connecting line where measurements are more than 45 days apart (missing reports)
+    const xs = [], ys = [], fl = [];
+    rows.forEach((r, i) => {
+      if (i && toMs(r.t) - toMs(rows[i - 1].t) > 45 * 86400000) { xs.push(null); ys.push(null); fl.push(null); }
+      xs.push(r.t); ys.push(r[v.k]); fl.push(r);
+    });
+    const traces = [{
+      x: xs, y: ys, connectgaps: false,
+      type: "scatter", mode: "lines+markers", name: "Измерение",
+      line: { color: accent, width: 1, dash: "dot" },
+      marker: { color: fl.map(r => r && r.flags.length ? warn : accent), size: 8, line: { color: surface, width: 2 } },
+      customdata: fl.map(r => r && r.flags.length ? "<br>⚠ " + r.flags.join("; ") : ""),
+      hovertemplate: `%{x|%d.%m.%Y %H:%M:%S} UTC<br><b>${v.sym} = %{y:.${v.dec}f} ${v.unit}</b>%{customdata}<extra></extra>`,
+    }];
+    if (showMean) {
+      const m = monthStats(v.k);
+      traces.push({
+        x: m.xs, y: m.ys, type: "scatter", mode: "markers", name: "Среднее ± СКО",
+        marker: { symbol: "diamond-open", size: 11, color: mean, line: { width: 2 } },
+        error_y: { type: "data", array: m.es, visible: true, color: mean, thickness: 1.5, width: 5 },
+        text: m.txt,
+        hovertemplate: `%{text}<br><b>среднее ${v.sym} = %{y:.${v.dec}f}</b><br>СКО = %{error_y.array:.${v.dec}f} ${v.unit}<extra></extra>`,
+      });
+    }
+    const layout = {
+      margin: { l: 66, r: 12, t: 10, b: 36 },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "IBM Plex Mono, ui-monospace, monospace", size: 11, color: muted },
+      showlegend: false, hovermode: "closest", dragmode: "zoom",
+      hoverlabel: { bgcolor: surface, bordercolor: line, font: { color: ink, family: "Golos Text, system-ui, sans-serif", size: 13 } },
+      xaxis: { type: "date", range: xrange, gridcolor: grid, linecolor: line, zeroline: false, tickformat: "%d.%m\n%Y", hoverformat: "%d.%m.%Y %H:%M" },
+      yaxis: { gridcolor: grid, linecolor: line, zeroline: false, tickformat: v.dec === 4 ? ".2f" : ",.0f", separatethousands: true, automargin: true },
+      separators: ", ",
+    };
+    Plotly.react(el, traces, layout, {
+      displaylogo: false, responsive: true, locale: "ru",
+      modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d", "toggleSpikelines", "hoverClosestCartesian", "hoverCompareCartesian"],
+      toImageButtonOptions: { filename: `baranova_${v.k}`, scale: 2 },
+    });
+    if (!el._bound) {
+      el._bound = true;
+      el.on("plotly_relayout", (ev) => {
+        if (syncing) return;
+        const lo = ev["xaxis.range[0]"], hi = ev["xaxis.range[1]"];
+        if (lo && hi) { setInputs(String(lo), String(hi)); markQuick(null); render(); }
+        else if (ev["xaxis.autorange"]) { /* double-click: keep current period */ render(); }
+      });
+    }
+  }
+  syncing = false;
+  renderTable(rows);
+  const nMonths = new Set(rows.map(r => r.t.slice(0, 7))).size;
+  $("count").textContent = `${rows.length} изм. · ${nMonths} мес.`;
+}
+
+function setInputs(lo, hi) {
+  const norm = (s) => {
+    s = s.trim().replace(" ", "T");
+    if (/^\d{4}-\d\d-\d\d$/.test(s)) s += "T00:00:00";
+    const ms = Date.parse(s.slice(0, 23) + "Z");
+    return isNaN(ms) ? "" : new Date(Math.round(ms / 1000) * 1000).toISOString().slice(0, 19);
+  };
+  $("from").value = norm(lo); $("to").value = norm(hi);
+}
+
+function renderTable(rows) {
+  const head = `<thead>
+    <tr><th></th><th class="grp sep" colspan="5">Абсолютные значения</th><th class="grp sep" colspan="4">Базисные значения</th><th class="sep"></th></tr>
+    <tr><th>Дата и время UTC</th>${VARS.abs.map((v, i) => `<th class="${i ? "" : "sep"}">${v.sym}, ${v.unit}</th>`).join("")}
+    ${VARS.basis.map((v, i) => `<th class="${i ? "" : "sep"}">${v.sym}, ${v.unit}</th>`).join("")}<th class="sep">Прибор</th></tr></thead>`;
+  const fmt = (x, d) => x == null ? "—" : x.toLocaleString("ru-RU", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const body = rows.length ? rows.slice().reverse().map(r => `<tr class="${r.flags.length ? "flag" : ""}" title="${r.flags.join("; ")}">
+    <td>${fmtDT(r.t)}</td>${VARS.abs.map((v, i) => `<td class="${i ? "" : "sep"}">${fmt(r[v.k], v.dec)}</td>`).join("")}
+    ${VARS.basis.map((v, i) => `<td class="${i ? "" : "sep"}">${fmt(r[v.k], v.dec)}</td>`).join("")}<td class="sep">${r.instrument}</td></tr>`).join("")
+    : `<tr><td colspan="11" class="empty">Нет измерений в выбранном периоде</td></tr>`;
+  $("tbl").innerHTML = head + "<tbody>" + body + "</tbody>";
+}
+
+function csvText(rows) {
+  const cols = ["t", ...ALL.map(v => v.k), "instrument"];
+  const hdr = ["datetime_utc", ...VARS.abs.map(v => v.sym + "_abs"), ...VARS.basis.map(v => v.sym.replace("₀", "0") + "_basis"), "instrument"];
+  return [hdr.join(";"), ...rows.map(r => cols.map(c => r[c] ?? "").join(";"))].join("\n");
+}
+
+function markQuick(which) {
+  document.querySelectorAll("#quick button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.range === which)));
+}
+
+function applyQuick(which) {
+  const recs = DATA.records; if (!recs.length) return;
+  const last = recs[recs.length - 1].t, first = recs[0].t;
+  let from = first;
+  if (which !== "all") {
+    const d = new Date(toMs(last)); d.setUTCMonth(d.getUTCMonth() - Number(which));
+    from = d.toISOString().slice(0, 19);
+    if (from < first) from = first;
+  }
+  setInputs(from.slice(0, 10) + "T00:00:00", last.slice(0, 10) + "T23:59:59");
+  markQuick(which); render();
+}
+
+function header() {
+  const r = DATA.records, months = Object.keys(DATA.months);
+  const insts = [...new Set(Object.values(DATA.months).map(m => m.instrument).filter(Boolean))];
+  const Is = r.map(x => x.aI).filter(x => x != null);
+  const meanI = Is.reduce((s, x) => s + x, 0) / Is.length;
+  $("facts").innerHTML = [
+    `Данные: <b>${fmtDate(r[0].t)} – ${fmtDate(r[r.length - 1].t)}</b>`,
+    `Отчётов: <b>${months.length}</b>`,
+    `Измерений: <b>${r.length}</b>`,
+    `Наклонение ≈ <b>${meanI.toFixed(2).replace(".", ",")}°</b>, поле почти вертикально`,
+    `Вариометр: <b>${insts.join(", ")}</b>`,
+  ].map(s => `<span>${s}</span>`).join("");
+  $("issueList").innerHTML = DATA.issues.length ? DATA.issues.map(s => `<li>${s}</li>`).join("") : "<li>Замечаний нет</li>";
+  $("issues").querySelector("summary").textContent = `Проверка данных · замечаний: ${DATA.issues.length}`;
+  $("foot").textContent = `Источник: ежемесячные отчёты магнитной станции, ледовая база «Мыс Баранова», ААНИИ. Данные собраны ${DATA.generated}. Проверяется: T = √(H² + Z²), I = arctg(Z/H), совпадение средних и СКО в отчёте с пересчётом по строкам, даты в пределах месяца отчёта. На графиках средние и СКО пересчитаны по измерениям.`;
+}
+
+async function loadData() {
+  try { const r = await fetch("data.json", { cache: "no-cache" }); if (r.ok) return await r.json(); } catch (e) {}
+  const inline = document.getElementById("inline-data");
+  if (inline) return JSON.parse(inline.textContent);
+  throw new Error("data.json не найден");
+}
+
+async function start() {
+  buildCards();
+  try { DATA = await loadData(); }
+  catch (e) { document.querySelector(".wrap").insertAdjacentHTML("beforeend", `<p class="empty">Не удалось загрузить данные: ${e.message}</p>`); return; }
+  header();
+  ["from", "to"].forEach(id => $(id).addEventListener("change", () => { markQuick(null); render(); }));
+  $("showMean").addEventListener("change", render);
+  document.querySelectorAll("#quick button").forEach(b => b.addEventListener("click", () => applyQuick(b.dataset.range)));
+  $("copyCsv").addEventListener("click", async () => {
+    const txt = csvText(filtered());
+    try { await navigator.clipboard.writeText(txt); $("copyNote").textContent = `Скопировано строк: ${filtered().length}. Вставьте в Excel или текстовый файл.`; }
+    catch (e) { $("copyNote").textContent = "Браузер не дал доступ к буферу обмена. Выделите таблицу и скопируйте вручную."; }
+  });
+  // On a normal web host (GitHub Pages) a direct CSV download works; inside sandboxed previews it is hidden.
+  if (location.protocol === "https:" && /github\.io$/.test(location.hostname)) {
+    const a = $("dlCsv"); a.hidden = false;
+    a.addEventListener("click", () => {
+      const blob = new Blob(["\ufeff" + csvText(filtered())], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob); const tmp = document.createElement("a");
+      tmp.href = url; tmp.download = "baranova_mpz.csv"; tmp.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+  applyQuick("all");
+  const rerender = () => render();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender);
+  new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}
+start();
+</script>
